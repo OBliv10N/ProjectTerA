@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include <time.h>
+#include<time.h>
 using namespace sf;
 
 const int nfieldwidth = 12;
@@ -7,12 +7,13 @@ const int nfieldheight = 18;
 
 int field[nfieldheight][nfieldwidth] = {};//ขนาดของเกม
 
-struct point { //กำหนดจุดเริ่ม
+
+struct point {
     int x, y;
 }a[4], b[4];
 
 int blocks[7][4] = {      //บล็อกค้าบไอ้ต้าว
-    2,4,6,8, /*  .X
+    2,4,6,8, /*    .X
                    .X
                    .X
                    .X   */
@@ -46,51 +47,32 @@ int blocks[7][4] = {      //บล็อกค้าบไอ้ต้าว
 
 };
 
-bool check()       //ชนขอบหรือป่าว
+int main()
 {
-    for (int i = 0; i < 4; i++)
-        if (a[i].x < 0 || a[i].x >= nfieldwidth || a[i].y >= nfieldheight) return 0;
-        else if (field[a[i].y][a[i].x]) return 0;
+    RenderWindow window(sf::VideoMode(1080, 720), "Play Game!");
 
-    return 1;
-};
-
-
-int main() {
-    RenderWindow window(VideoMode(1080, 720), "Test !");
     Texture t;
     t.loadFromFile("Image/tiles.png");
 
     Sprite s(t);
     s.setTextureRect(IntRect(0, 0, 18, 18));
 
-    int m = 0; bool rotate = 0; double time = 0; double delay = 0.25;
+    int m = 0; bool rotate = 0; double time = 0; double delay = 0.3;
 
-    while (window.isOpen()) {
-        Event e;
-        while (window.pollEvent(e)) {
-            if (e.type == Event::Closed) {
+    while (window.isOpen())
+    {
+        Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == Event::Closed)
                 window.close();
-            }
-
-
-            if (Keyboard::isKeyPressed(Keyboard::A)) m = -1;
-            else if (Keyboard::isKeyPressed(Keyboard::D)) m = 1;
-            else if (Keyboard::isKeyPressed(Keyboard::W)) rotate = true;
-
-
-
-
-
-            // Move
-            for (int i = 0; i < 4; i++) {
-                a[i].x += m;
-            }
-
-
-            //rotate
-            if (rotate) {
-                point p = a[1];
+            
+            if (Keyboard::isKeyPressed(Keyboard::Up)) rotate = true;
+            else if (Keyboard::isKeyPressed(Keyboard::Left)) m = -1;
+            else if (Keyboard::isKeyPressed(Keyboard::Right)) m = 1;
+            
+           if (rotate) {
+                point p = a[0];
                 for (int i = 0; i < 4; i++) {
                     int x = a[i].y - p.y;
                     int y = a[i].x - p.x;
@@ -98,25 +80,34 @@ int main() {
                     a[i].y = p.y + y;
                 }
             }
+            
 
-
-            int n = 0;
-            if (a[0].x == 0)
-                for (int i = 0; i < 4; i++) {
-                    a[i].x = blocks[n][i] % 2;
-                    a[i].y = blocks[n][i] / 2;
-                }
-
-            m = 0; rotate = 0;   
-            window.clear(Color::White);
-
+            // Move
             for (int i = 0; i < 4; i++) {
-                s.setPosition(a[i].x * 18, a[i].y * 18);
-                window.draw(s);
+                a[i].x += m;
             }
 
-            window.display();
+            
+
         }
 
-        return 0;
+        int n = 2;
+        if (a[0].x == 0)
+        for (int i = 0; i < 4; i++) {
+            a[i].x = blocks[n][i] % 2;
+            a[i].y = blocks[n][i] / 2;
+        }
+
+        m = 0; rotate = 0;
+        window.clear(Color::Green);
+
+        for (int i = 0; i < 4; i++) {
+            s.setPosition(a[i].x * 18, a[i].y * 18);
+            window.draw(s);
+        }
+
+        window.display();
     }
+
+    return 0;
+}
