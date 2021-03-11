@@ -56,11 +56,11 @@ bool check()       //ชนขอบหรือป่าว
     return 1;
 };
 
-int main(){
-
+int main()
+{
     RenderWindow window(sf::VideoMode(1080, 720), "Play Game!");
 
-    Clock time1;
+    Clock t;
 
     Texture c;
     c.loadFromFile("Image/tiles.png");
@@ -68,13 +68,13 @@ int main(){
     Sprite s(c);
     s.setTextureRect(IntRect(0, 0, 18, 18));
 
-    int m = 0; bool rotate = 0; double timer = 0; double delay = 0.2; 
+    int m = 0; bool rotate = 0; double timer = 0; double delay = 0.25; double speed = 1;
 
     while (window.isOpen()) {
 
-        double t = time1.getElapsedTime().asSeconds();
-        //time1.restart();
-        timer += t;
+        double time = t.getElapsedTime().asSeconds();
+        t.restart();
+        timer += time;
 
 
         Event event;
@@ -89,19 +89,6 @@ int main(){
 
 
 
-            // Move
-            for (int i = 0; i < 4; i++) {
-                w[i].x = b[i].x;
-                b[i].x += m;
-                              
-            }if (!check()) {
-                for (int i = 0; i < 4; i++) {
-                     b[i].x = w[i].x;
-                }
-            }   
-
-            
-
 
 
             if (rotate) {
@@ -112,44 +99,44 @@ int main(){
                     b[i].x = p.x - x;
                     b[i].y = p.y + y;
                 }
-                if (!check()) {
-                    for (int i = 0; i < 4; i++) {
-                        b[i].x = w[i].x;
-                    }
-                }
-
-
-
-
-
-                //down
-                if (timer > delay) {
-                    for (int i = 0; i < 4; i++) {
-                        b[i].y = b[i].y + 1;
-                        timer = 0;
-                    }
-
-
-                }
-
-                int n = 2;
-                if (b[1].x == 0)
-                    for (int i = 0; i < 4; i++) {
-                        b[i].x = blocks[n][i] % 4;
-                        b[i].y = blocks[n][i] / 4;
-                    }
-
-                m = 0; rotate = 0;
-                window.clear(Color::Green);
-
-                for (int i = 0; i < 4; i++) {
-                    s.setPosition(b[i].x * 18, b[i].y * 18);
-                    window.draw(s);
-                }
-
-                window.display();
             }
 
-            return 0;
+
+            // Move
+            for (int i = 0; i < 4; i++) {
+                w[i].x = b[i].x;
+                b[i].x += m;
+            }
+
+            //down
+            if (timer > delay) {
+                for (int i = 0; i < 4; i++) {
+                    b[i].y += 1;
+                    timer = 0;
+
+                }
+            }
+
+
         }
+
+        int n = 2;
+        if (b[1].x == 0)
+            for (int i = 0; i < 4; i++) {
+                b[i].x = blocks[n][i] % 4;
+                b[i].y = blocks[n][i] / 4;
+            }
+
+        m = 0; rotate = 0;
+        window.clear(Color::Green);
+
+        for (int i = 0; i < 4; i++) {
+            s.setPosition(b[i].x * 18, b[i].y * 18);
+            window.draw(s);
+        }
+
+        window.display();
     }
+
+    return 0;
+}
