@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
-#include<time.h>
+#include <time.h>
+#include <iostream>
 using namespace sf;
+using namespace std;
 
 const int displaywidth = 10;
 const int displaydheight = 20;
@@ -30,29 +32,146 @@ point blocks[7][4] = {    //blocks//
               
 };
 
-bool check()    //check cash display//
-{
+class Game {
+    public:
+
+        int m = 0;
+        int Num = 1;
+        bool rotation = false;
+        float timer = 0;
+        float delay = 0.3;
+
+        bool check();
+        bool gameover();
+        void rotate();
+        void move();
+        void checkline();
+        void godown();
+        void MenuGameOver();
+        Game();
+};
+
+//check cash display//
+
+bool Game::check() {
+
     for (int i = 0; i < 4; i++)
         if (b[i].x < 0 || b[i].x >= displaywidth || b[i].y >= displaydheight) return 0;
         else if (display[b[i].y][b[i].x] != 0) return 0;
 
     return 1;
-};
+}
 
-int main() {
+//game over//
+ 
+bool Game::gameover() {
+
+    for (int i = 0; i < displaywidth; i++) {
+        if (b[i].x == display[b[i].y][b[i].x]) return true;
+    }      
+    return false;
+}
+
+void Game::MenuGameOver() {
+
+    if (gameover() == false) {
+
+        RenderWindow window(VideoMode(320, 480), "Play Game!");
+        Texture BG;
+        BG.loadFromFile("image/tiles.png");
+    }
+}
+
+//rotate//
+
+void Game::rotate() {
+
+    if (rotation) {
+        point p = b[1];
+        int x, y;
+
+        for (int i = 0; i < 4; i++) {
+            x = b[i].y - p.y;
+            y = b[i].x - p.x;
+            b[i].x = p.x - x;
+            b[i].y = p.y + y;
+        }
+    }
+    if (!check()) {
+        for (int i = 0; i < 4; i++) b[i] = w[i];
+    }
+}
+
+//move//
+
+void Game::move() {
+
+    for (int i = 0; i < 4; i++) {
+        w[i].x = b[i].x;
+        b[i].x += m;
+    }
+    if (!check()) {
+        for (int i = 0; i < 4; i++) b[i] = w[i];
+    }
+}
+
+//godown//
+
+void Game::godown() {
+
+    if (timer > delay) {
+        for (int i = 0; i < 4; i++) {
+            w[i] = b[i];
+            b[i].y += 1;
+        }
+        if (!check()) {
+            for (int i = 0; i < 4; i++) {
+                display[w[i].y][w[i].x] = Num;
+            }
+            Num = 1 + rand() % 7;
+
+            int N = rand() % 7;
+
+            for (int i = 0; i < 4; i++) {
+                b[i].x = blocks[N][i].x;
+                b[i].y = blocks[N][i].y;
+            }
+        }
+        timer = 0;
+    }
+}
+
+//checkline + Point//
+
+void Game::checkline() {
+
+    int point = 0;
+    int k = displaydheight - 1;
+
+    for (int i = displaydheight - 1; i > 0; i--) {
+        int count = 0;
+
+        for (int j = 0; j < displaywidth; j++) {
+            if (display[i][j] != 0) count++;
+            display[k][j] = display[i][j];
+        }
+        if (count < displaywidth) k--;  //delete Array (pointer);
+    }
+    if (k == 0) point = point + 5;
+}
+
+//GameTetris//
+
+Game::Game() {
 
     srand(time(0));
-
-    int m = 0, Num = 1;
-    bool rotate = false;
-    float timer = 0, delay = 0.3;
 
     RenderWindow window(VideoMode(320, 480), "Play Game!");    //size of windows & name//
 
     Clock t;
 
     Texture c;
-    /* c.loadFromFile("image/tiles.png"); */
+    c.loadFromFile("image/tiles.png");
 
     Sprite s(c);
 
@@ -67,79 +186,21 @@ int main() {
 
             if (event.type == Event::Closed) window.close();
 
-            if (Keyboard::isKeyPressed(Keyboard::Up)) rotate = true;
+            if (Keyboard::isKeyPressed(Keyboard::Up)) rotation = true;
             else if (Keyboard::isKeyPressed(Keyboard::Left)) m = -1;
             else if (Keyboard::isKeyPressed(Keyboard::Right)) m = 1;
         }
         if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;   //for go down quick//
 
-            //rotate//
+        rotate();
+        move();
+        godown();
+        checkline();
+        gameover();
 
-            if (rotate) {
-                point p = b[1];
-                int x, y;
-
-                for (int i = 0; i < 4; i++) {
-                    x = b[i].y - p.y;
-                    y = b[i].x - p.x;
-                    b[i].x = p.x - x;
-                    b[i].y = p.y + y;
-                }
-            }
-            if (!check()) {
-                for (int i = 0; i < 4; i++) b[i] = w[i];
-            }
-
-            //move//
-
-            for (int i = 0; i < 4; i++) {
-                w[i].x = b[i].x;
-                b[i].x += m;
-            }
-            if (!check()) {
-                for (int i = 0; i < 4; i++) b[i] = w[i];
-            }
-
-            //down//
-
-            if (timer > delay) {
-                for (int i = 0; i < 4; i++) {
-                    w[i] = b[i];
-                    b[i].y += 1;
-                }
-                if (!check()) {
-                    for (int i = 0; i < 4; i++) {
-                        display[w[i].y][w[i].x] = Num;
-                    }
-                    Num = 1 + rand() % 7;
-
-                    int N = rand() % 7;
-
-                    for (int i = 0; i < 4; i++) {
-                        b[i].x = blocks[N][i].x;
-                        b[i].y = blocks[N][i].y;
-                    }
-                }
-                timer = 0;
-            }
-
-            //checkline//
-
-            int k = displaydheight - 1;
-
-            for (int i = displaydheight - 1; i > 0; i--) {
-                int count = 0;
-
-                for (int j = 0; j < displaywidth; j++) {
-                    if (display[i][j] != 0) count++;
-                    display[k][j] = display[i][j];
-                }
-                if (count < displaywidth) k--;  //delete Array (pointer);
-            }
-
-        m = 0; rotate = 0; delay = 0.3;
+        m = 0; rotation = 0; delay = 0.3;
         window.clear(Color::Black);
-        
+
 
         for (int i = 0; i < displaydheight; i++) {
             for (int j = 0; j < displaywidth; j++) {
@@ -152,7 +213,7 @@ int main() {
             }
         }
 
-        m = 0; rotate = false; delay = 0.5;
+        m = 0; rotation = false; delay = 0.5;
 
         for (int i = 0; i < 4; i++) {
             s.setTextureRect(IntRect(Num * 18, 0, 18, 18));
@@ -160,9 +221,15 @@ int main() {
             s.move(24, 24);
             window.draw(s);
         }
-        
+
         window.display();
     }
+}
+
+int main() {
+
+    RenderWindow window(VideoMode(320, 480), "Play Game!");
+    Game Tetris;
 
     return 0;
 }
