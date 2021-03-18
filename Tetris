@@ -5,16 +5,16 @@ using namespace sf;
 using namespace std;
 
 const int displaywidth = 10;
-const int displaydheight = 20;
+const int displaydheight = 23;
 
 int display[displaydheight][displaywidth] = {0};  //size of display//
 
-struct point {
+struct block {
     int x, y;
 }
 b[4] = { {1,0},{1,1},{1,2},{1,3} }, w[4];
 
-point blocks[7][4] = {    //blocks//
+block blocks[7][4] = {    //blocks//
  
  { {1,0},{1,1},{1,2},{1,3} },
 
@@ -37,6 +37,7 @@ class Game {
 
         int m = 0;
         int Num = 1;
+        int point = 0;
         bool rotation = false;
         float timer = 0;
         float delay = 0.3;
@@ -48,6 +49,7 @@ class Game {
         void checkline();
         void godown();
         void MenuGameOver();
+        void score();
         Game();
 };
 
@@ -87,7 +89,7 @@ void Game::MenuGameOver() {
 void Game::rotate() {
 
     if (rotation) {
-        point p = b[1];
+        block p = b[1];
         int x, y;
 
         for (int i = 0; i < 4; i++) {
@@ -141,11 +143,26 @@ void Game::godown() {
     }
 }
 
+/*void Game::score() {
+
+    RenderWindow window(VideoMode(320, 480), "Play Game!");
+
+    while (window.isOpen()) {
+        Font sc;
+        sc.loadFromFile("Pixellari");
+        Text ss;
+        ss.setCharacterSize(20);
+        ss.setPosition({ 5,5 });
+        ss.setFont(sc);
+
+        cout << "SCORE: " << point;
+    }
+}*/
+
 //checkline + Point//
 
 void Game::checkline() {
 
-    int point = 0;
     int k = displaydheight - 1;
 
     for (int i = displaydheight - 1; i > 0; i--) {
@@ -160,6 +177,7 @@ void Game::checkline() {
     if (k == 0) point = point + 5;
 }
 
+
 //GameTetris//
 
 Game::Game() {
@@ -170,10 +188,16 @@ Game::Game() {
 
     Clock t;
 
-    Texture c;
+    Font sc;
+
+    Texture c,A,B;
+    B.loadFromFile("image/display.png");
+    A.loadFromFile("image/menu.png");
     c.loadFromFile("image/tiles.png");
 
-    Sprite s(c);
+    Sprite s(c) , s1, s2;
+    s1.setTexture(A);
+    s2.setTexture(B);
 
     while (window.isOpen()) {
 
@@ -182,8 +206,8 @@ Game::Game() {
         timer += time;
 
         Event event;
-        while (window.pollEvent(event)) {
 
+        while (window.pollEvent(event)) {
             if (event.type == Event::Closed) window.close();
 
             if (Keyboard::isKeyPressed(Keyboard::Up)) rotation = true;
@@ -200,7 +224,7 @@ Game::Game() {
 
         m = 0; rotation = 0; delay = 0.3;
         window.clear(Color::Black);
-
+        window.draw(s2);
 
         for (int i = 0; i < displaydheight; i++) {
             for (int j = 0; j < displaywidth; j++) {
@@ -221,10 +245,10 @@ Game::Game() {
             s.move(24, 24);
             window.draw(s);
         }
-
         window.display();
     }
 }
+
 
 int main() {
 
